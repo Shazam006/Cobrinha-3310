@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const native=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const source=path.join(native,'../dist');
+const destination=path.join(native,'www');
+fs.mkdirSync(destination,{recursive:true});
+let html=fs.readFileSync(path.join(source,'index.html'),'utf8');
+html=html.replace(/<script>\s*if \('serviceWorker'[\s\S]*?<\/script>/,'');
+html=html.replace(/<link rel="manifest"[^>]*\/>/,'');
+html=html.replace("if (isIOS && !isStandalone)","if (false)");
+html=html.replace("      window.addEventListener('pagehide',", "      window.addEventListener('nativePause',()=>{if(state==='running')pause()});\n      window.addEventListener('pagehide',");
+fs.writeFileSync(path.join(destination,'index.html'),html);
+fs.cpSync(path.join(source,'icons'),path.join(destination,'icons'),{recursive:true});
+console.log('Native UI generated: bundled locally, no hosting sign-in or service worker needed.');

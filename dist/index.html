@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#18251f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Cobrinha 3310" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
+  <meta name="description" content="Jogo da cobrinha inspirado nos celulares clássicos de teclado. Jogue no iPhone, Android ou computador, com modo offline após a primeira visita." />
+  <title>Snake 3310 — Cobrinha Clássica</title>
+  <style>
+    :root { --bg:#18251f;--case:#c9d0c8;--case-hi:#edf0e8;--ink:#25382b;--lcd:#acbd88;--lcd-deep:#799469;--accent:#ecf2df;--txt:#e6eddd }
+    * { box-sizing:border-box }
+    html { height:100%; background:var(--bg) }
+    body { margin:0; min-height:100%; display:flex;align-items:center;justify-content:center; padding:20px 12px calc(20px + env(safe-area-inset-bottom));font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--txt);background:radial-gradient(circle at 50% 8%,#33483a 0%,#1d2e25 48%,#111c16 100%); }
+    button { font:inherit; -webkit-tap-highlight-color:transparent; cursor:pointer; touch-action:manipulation }
+    button:focus-visible {outline:3px solid #e1f9b0;outline-offset:3px}
+    .page {display:flex; flex-direction:column; align-items:center; width:100%; max-width:454px; gap:12px}
+    .eyebrow {display:flex;gap:9px;align-items:center;letter-spacing:.2em;color:#b4c5b0;text-transform:uppercase;font-weight:800;font-size:10px}
+    .eyebrow .led {width:7px;height:7px;border-radius:50%;background:#a9cd82;box-shadow:0 0 10px #a9cd82}
+    h1 {font-size:clamp(22px,5vw,27px);font-weight:900;letter-spacing:-.055em;margin:0;text-align:center;line-height:1.15}
+    h1 span {color:#b6d391}
+    .phone {width:100%;max-width:400px; padding:22px 19px 19px; position:relative; border:1px solid #f7fff3;border-bottom:6px solid #89968a;border-radius:42px 42px 57px 57px;background:linear-gradient(127deg,#f2f5ec 0%,#cbd5ca 45%,#aabbb0 100%);box-shadow:inset -9px -9px 18px #82938860,inset 9px 8px 12px #ffffffb8,0 12px 0 #687b70,0 30px 55px #0008;}
+    .phone::before {content:"";position:absolute;left:50%;top:8px;transform:translateX(-50%);height:3px;width:38px;border-radius:6px;background:#829588;box-shadow:0 1px #fff9}
+    .brand {color:#243b32;font-size:13px;font-weight:950;letter-spacing:.27em;text-align:center;margin:3px 0 12px;text-shadow:0 1px 0 #fff}
+    .bezel {padding:14px 12px 12px; background:linear-gradient(135deg,#445b51,#203b34 75%);border:4px solid #869b91;border-radius:17px 17px 30px 30px;box-shadow:inset 0 4px 7px #0007,0 2px 2px #fff9;}
+    .screen {position:relative;background:var(--lcd);overflow:hidden;border:4px solid #5f7865;border-radius:6px;box-shadow:inset 0 0 24px #435b3e35,0 0 0 1px #ccd8b4;}
+    .hud {height:40px;display:flex;align-items:center;justify-content:space-between;padding:5px 10px 3px;border-bottom:2px solid #3e59374d;color:var(--ink);font-family:ui-monospace,Consolas,monospace;font-weight:900;font-size:12px;letter-spacing:-.05em;gap:5px;}
+    .hud strong {font-size:17px;letter-spacing:0}
+    .field {position:relative;aspect-ratio:1;width:100%;background:repeating-linear-gradient(0deg,transparent 0px,transparent calc(5% - 1px),#45664409 calc(5% - 1px),#45664409 5%),repeating-linear-gradient(90deg,transparent 0px,transparent calc(5% - 1px),#45664409 calc(5% - 1px),#45664409 5%)}
+    canvas {display:block;width:100%;height:100%;image-rendering:pixelated;touch-action:none}
+    .overlay {position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#acbd88d9;color:var(--ink);gap:10px;padding:14px}
+    .overlay[hidden] {display:none}
+    .overlay .icon {font-size:36px;line-height:1}
+    .overlay-title {font-size:clamp(23px,8vw,37px);font-family:ui-monospace,Consolas,monospace;font-weight:1000;letter-spacing:-.09em;line-height:1.03;text-transform:uppercase}
+    .overlay-detail {font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:750;max-width:260px;line-height:1.45}
+    .play-btn {background:#2f4a31;color:#e0edcb;padding:11px 22px;font-weight:900;font-size:14px;border:0;border-radius:5px;box-shadow:3px 3px 0 #68805d;}
+    .play-btn:active {transform:translate(2px,2px);box-shadow:1px 1px 0 #68805d}
+    .screen-bottom {display:flex;justify-content:space-between;align-items:center;color:var(--ink);padding:6px 9px 7px;font:900 10px ui-monospace,Consolas,monospace;border-top:2px solid #3e59374d;letter-spacing:.04em}
+    .screen-bottom span:last-child{font-size:11px}
+    .speaker {height:4px;width:56px;margin:12px auto 9px;background:repeating-linear-gradient(90deg,#456358 0 4px,transparent 4px 9px);opacity:.8;border-radius:3px}
+    .control-area {display:flex;justify-content:center;align-items:center;gap:16px;padding-top:8px}
+    .dpad {width:164px;height:164px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;background:linear-gradient(145deg,#b6c2b7,#e3eae0);padding:6px;border-radius:50%;box-shadow:inset 0 2px 7px #45615933,0 3px #82998e}
+    .dpad .arrow {border:0;color:#eff4e8;background:linear-gradient(145deg,#405e50,#233d33);font-weight:900;font-size:25px;box-shadow:inset 0 1px 3px #ffffff20,0 3px 0 #13251b;display:grid;place-items:center;padding:0;user-select:none;-webkit-user-select:none}
+    .dpad .arrow:active,.dpad .arrow.pressed {background:#658468;transform:translateY(2px);box-shadow:0 1px #13251b}
+    .dpad .up {grid-column:2;grid-row:1;border-radius:11px 11px 4px 4px}
+    .dpad .left {grid-column:1;grid-row:2;border-radius:11px 4px 4px 11px}
+    .dpad .right {grid-column:3;grid-row:2;border-radius:4px 11px 11px 4px}
+    .dpad .down {grid-column:2;grid-row:3;border-radius:4px 4px 11px 11px}
+    .dpad .center {grid-column:2;grid-row:2;border-radius:7px;background:#b7c8b6;box-shadow:inset 0 2px 5px #233d3350;display:grid;place-items:center;color:#405e50;font-size:21px;font-weight:1000}
+    .side {display:flex;flex-direction:column;gap:11px;align-items:center;width:82px}
+    .side button{width:100%;min-height:44px;padding:8px 2px;display:flex;align-items:center;justify-content:center;gap:4px;flex-direction:column;border:0;border-radius:15px;background:linear-gradient(145deg,#f8faf5,#a5b7ab);color:#2a4236;font-weight:950;font-size:10px;box-shadow:0 3px 0 #6d8073,inset 0 2px 3px #fff;letter-spacing:.015em}
+    .side button:active{transform:translateY(2px);box-shadow:0 1px 0 #6d8073}
+    .side button span{font-size:20px;line-height:1}
+    .toolbar {display:flex;width:min(100%,400px);gap:10px;justify-content:space-between;align-items:center}
+    .difficulty {display:flex;gap:5px;padding:4px;background:#15251cbc;border:1px solid #465e4e;border-radius:14px;flex:1}
+    .difficulty button {border:0;border-radius:10px;padding:9px 6px;flex:1;background:transparent;color:#b8c8b4;font-size:11px;font-weight:850}
+    .difficulty button[aria-pressed="true"] {background:#adc98e;color:#233c28}
+    .record {font-size:11px;line-height:1.3;text-align:right;color:#bacbb6;min-width:77px}
+    .record strong {display:block;color:#f0f7e5;font-size:21px;line-height:1.05}
+    .hint {font-size:11px;text-align:center;color:#b6c9b4;margin:0;max-width:360px;line-height:1.4}
+    .iphone-install {display:none;max-width:400px;border:1px solid #607657;background:#23362b;color:#dbe7d1;border-radius:13px;padding:12px 14px;text-align:center;font-size:12px;line-height:1.5}
+    .iphone-install strong{color:#cbe1a5}
+    @media (max-width:380px) {body{padding:12px 10px 20px}.phone{padding:18px 13px 14px;border-radius:36px 36px 47px 47px}.bezel{padding:9px 8px 8px}.brand{margin-bottom:9px}.hud{height:33px;font-size:10px}.hud strong{font-size:15px}.dpad{width:138px;height:138px}.control-area{padding-top:5px}.side button{min-height:40px}.overlay .icon{font-size:30px}}
+    @media (max-height:720px) and (min-width:381px) {body{align-items:flex-start}.page{gap:8px}.phone{max-width:350px;padding:15px}.dpad{width:132px;height:132px}.bezel{padding:8px}.speaker{margin:8px auto 4px}.control-area{padding-top:0}}
+    @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    body {min-height:100svh;padding:max(14px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+    .field {touch-action:none;user-select:none;-webkit-user-select:none}
+    .eyebrow {font-size:12px;letter-spacing:.1em}
+    .hud {font-size:12px;letter-spacing:0;padding-inline:7px}
+    .hud>span:first-child {font-size:11px}
+    .screen-bottom {font-size:11px;letter-spacing:0}
+    .dpad {width:150px;height:150px;flex-shrink:0;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px)}
+    .side {width:94px;gap:6px}
+    .side button {min-height:46px;padding:5px 2px;font-size:12px;gap:2px}
+    .side button small {font-size:11px}
+    .side button:disabled {opacity:.55;cursor:default}
+    .difficulty button {min-width:44px;min-height:44px;font-size:12px}
+    .record,.hint,.iphone-install {font-size:12px}
+    .play-btn {min-height:44px;min-width:44px}
+    @media (max-height:740px) {
+      body {align-items:flex-start;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom))}
+      .page {gap:7px}
+      h1 {font-size:22px}
+      .phone {max-width:284px;padding:12px;border-radius:32px 32px 42px 42px}
+      .brand {margin:2px 0 7px;font-size:12px;letter-spacing:.18em}
+      .bezel {padding:7px;border-width:3px}
+      .screen {border-width:3px}
+      .hud {height:32px;font-size:12px}
+      .hud strong {font-size:15px}
+      .screen-bottom {padding:4px 6px}
+      .speaker {margin:7px auto 5px}
+      .control-area {padding-top:0;gap:12px}
+      .overlay {gap:7px;padding:10px}
+      .overlay .icon {font-size:24px}
+      .overlay-title {font-size:28px}
+      .overlay-detail {font-size:12px;line-height:1.3}
+    }
+    @media (orientation:landscape) and (max-height:600px) {
+      .phone {max-width:420px}
+      .bezel {width:230px}
+      .control-area {position:absolute;right:13px;top:65px;flex-direction:column;gap:12px}
+      .control-area .dpad {width:150px;height:150px}
+      .control-area .side {width:150px;flex-direction:row;gap:5px}
+      .side button {min-width:46px;min-height:52px}
+      .side button small {font-size:9px}
+      .brand {text-align:left;margin-left:45px}
+      .speaker {display:none}
+      .hud>span:first-child {display:none}
+      .overlay .icon {display:none}
+      .overlay-title {font-size:25px}
+    }
+    @media (orientation:landscape) and (max-height:600px) and (min-width:700px) {
+      .page {max-width:740px;display:grid;grid-template-columns:420px 1fr;column-gap:16px;align-items:start}
+      .phone {grid-column:1;grid-row:1 / span 5}
+      .eyebrow {grid-column:2;grid-row:1;justify-content:center;letter-spacing:0;font-size:11px}
+      h1 {grid-column:2;grid-row:2}
+      .toolbar {grid-column:2;grid-row:3;gap:6px}
+      .difficulty {gap:0;padding:3px}
+      .difficulty button {padding:6px 3px;font-size:11px}
+      .record {min-width:55px}
+      .hint {grid-column:2;grid-row:4}
+      .iphone-install {grid-column:2;grid-row:5;padding:9px}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="eyebrow"><span class="led" aria-hidden="true"></span>RETRO ARCADE / EDIÇÃO 3310</div>
+    <h1>COBRINHA <span>CLÁSSICA</span></h1>
+    <section class="phone" aria-label="Jogo da cobrinha retrô 3310">
+      <div class="brand" aria-label="Modelo retrô 3310">S N A K E &nbsp; · &nbsp; 3 3 1 0</div>
+      <div class="bezel">
+        <div class="screen">
+          <div class="hud"><span>● SNAKE II</span><span>PTS <strong id="score">000</strong></span><span id="status" role="status" aria-live="polite">PRONTO</span></div>
+          <div class="field" id="field"><canvas id="game" width="400" height="400" role="img" aria-label="Tabuleiro da cobrinha: use os botões direcionais, swipe ou as setas do teclado.">Jogo da cobrinha em uma grade de 20 por 20. Use os controles abaixo.</canvas>
+            <div class="overlay" id="overlay" role="status">
+              <div class="icon" id="overlay-icon" aria-hidden="true">▦</div>
+              <div class="overlay-title" id="overlay-title">SNAKE<br>3310</div>
+              <div class="overlay-detail" id="overlay-detail">Coma os pontos, cresça e não bata na parede ou em você.</div>
+              <button class="play-btn" id="play" aria-label="Iniciar jogo">▶ JOGAR</button>
+            </div>
+          </div>
+          <div class="screen-bottom"><span>◼ ◼ ◼ ◼ &nbsp; RETRO MODE</span><span id="sound-indicator">♪ ON</span></div>
+        </div>
+      </div>
+      <div class="speaker" aria-hidden="true"></div>
+      <div class="control-area">
+        <div class="dpad" aria-label="Controles direcionais">
+          <button class="arrow up" data-dir="up" aria-label="Cima">▲</button>
+          <button class="arrow left" data-dir="left" aria-label="Esquerda">◀</button>
+          <span class="center" aria-hidden="true">+</span>
+          <button class="arrow right" data-dir="right" aria-label="Direita">▶</button>
+          <button class="arrow down" data-dir="down" aria-label="Baixo">▼</button>
+        </div>
+        <div class="side">
+          <button id="pause" aria-label="Pausar ou continuar"><span id="pause-icon">Ⅱ</span><small id="pause-label">PAUSA</small></button>
+          <button id="restart" aria-label="Reiniciar jogo"><span>↻</span><small>REINICIAR</small></button>
+          <button id="sound" aria-label="Ativar ou desativar som"><span id="sound-icon">♫</span><small id="sound-label">SOM ON</small></button>
+        </div>
+      </div>
+    </section>
+    <div class="toolbar">
+      <div class="difficulty" aria-label="Dificuldade">
+        <button data-speed="easy" aria-pressed="true">FÁCIL</button>
+        <button data-speed="normal" aria-pressed="false">NORMAL</button>
+        <button data-speed="hard" aria-pressed="false">RÁPIDO</button>
+      </div>
+      <div class="record">RECORDE<strong id="best">000</strong></div>
+    </div>
+    <p class="hint">Deslize o dedo na tela ou use as setas. No computador, use as teclas direcionais ou WASD. Espaço pausa.</p>
+    <aside class="iphone-install" id="iphone-install"><strong>Instalar no iPhone:</strong> no Safari, toque em Compartilhar e escolha <strong>Adicionar à Tela de Início</strong>. Ative “Abrir como App” quando disponível.</aside>
+  </main>
+  <script>
+    'use strict';
+    (() => {
+      const N=20, CELL=20, cvs=document.getElementById('game'), ctx=cvs.getContext('2d',{alpha:false});
+      const $=id=>document.getElementById(id);
+      const overlay=$('overlay'), title=$('overlay-title'), detail=$('overlay-detail'), oi=$('overlay-icon'), play=$('play');
+      const scoreEl=$('score'), bestEl=$('best'), status=$('status');
+      const dirs={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+      const speeds={easy:170,normal:125,hard:85};
+      const store=(name,val)=>{try{localStorage.setItem(name,String(val))}catch(e){}};
+      const read=(name,fallback)=>{try{return localStorage.getItem(name)??fallback}catch(e){return fallback}};
+      let difficulty=read('snake3310_difficulty','easy');
+      if(!speeds[difficulty])difficulty='easy';
+      let soundOn=read('snake3310_sound','true')==='true';
+      const savedBest=Number(read('snake3310_best','0'));
+      let best=Number.isFinite(savedBest)?Math.min(3970,Math.max(0,Math.floor(savedBest))):0;
+      let snake=[], food=null,dir=dirs.right,pending=[],state='ready',points=0,timer=0,audioContext=null;
+      const fmt=v=>String(v).padStart(3,'0');
+      const same=(a,b)=>a.x===b.x&&a.y===b.y;
+      const updateHud=()=>{scoreEl.textContent=fmt(points);bestEl.textContent=fmt(best);status.textContent={ready:'PRONTO',running:'JOGANDO',paused:'PAUSADO',lost:'FIM',won:'VENCEU'}[state];$('pause-icon').textContent=state==='paused'?'▶':'Ⅱ';$('pause-label').textContent=state==='paused'?'CONTINUAR':'PAUSA';$('pause').disabled=state!=='running'&&state!=='paused';$('pause').setAttribute('aria-label',state==='paused'?'Continuar jogo':'Pausar jogo')};
+      // Only trusted user gestures create or resume audio; game ticks cannot unlock it.
+      function unlockAudio(event){if(!soundOn||!event.isTrusted)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audioContext=audioContext||new AC();if(audioContext.state==='suspended')audioContext.resume().catch(()=>{})}catch(e){}}
+      document.addEventListener('click',unlockAudio,true);
+      document.addEventListener('keydown',unlockAudio,true);
+      document.addEventListener('pointerup',unlockAudio,true);
+      function tone(freq=520,duration=.06,type='square') {if(!soundOn||!audioContext||audioContext.state!=='running')return;try{const o=audioContext.createOscillator(),g=audioContext.createGain(),now=audioContext.currentTime;o.type=type;o.frequency.setValueAtTime(freq,now);g.gain.setValueAtTime(.045,now);g.gain.exponentialRampToValueAtTime(.001,now+duration);o.connect(g);g.connect(audioContext.destination);o.start(now);o.stop(now+duration)}catch(e){}}
+      function buzz(n=20){try{if(navigator.vibrate)navigator.vibrate(n)}catch(e){}}
+      function randomFood(){const cells=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(!snake.some(p=>p.x===x&&p.y===y))cells.push({x,y});return cells.length?cells[Math.floor(Math.random()*cells.length)]:null;}
+      function reset(){clearTimeout(timer);snake=[{x:6,y:10},{x:5,y:10},{x:4,y:10}];dir=dirs.right;pending=[];points=0;food=randomFood();}
+      function show(t,d,icon,btn){title.innerHTML=t;detail.textContent=d;oi.textContent=icon;play.textContent=btn;play.setAttribute('aria-label',state==='paused'?'Continuar jogo':'Jogar de novo');overlay.hidden=false;}
+      function start(){reset();state='running';overlay.hidden=true;updateHud();draw();tone(440,.08);schedule();}
+      function schedule(){clearTimeout(timer);if(state!=='running')return;const ms=Math.max(52,speeds[difficulty]-Math.floor(points/50)*5);timer=window.setTimeout(tick,ms);}
+      function tick(){if(state!=='running')return;if(pending.length){dir=pending.shift()};const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};const eating=food&&same(head,food);
+        const tailSafe=snake.slice(0,eating?snake.length:snake.length-1);
+        if(head.x<0||head.x>=N||head.y<0||head.y>=N||tailSafe.some(s=>same(s,head))){finish(false);return;}
+        snake.unshift(head);
+        if(eating){points+=10;tone(690,.045);buzz(10);if(points>best){best=points;store('snake3310_best',best)};food=randomFood();if(!food){finish(true);return;}}
+        else snake.pop();updateHud();draw();schedule();
+      }
+      function finish(won){clearTimeout(timer);state=won?'won':'lost';updateHud();draw();tone(won?750:175,.24);buzz(won?60:140);show(won?'VOCÊ<br>VENCEU!':'FIM DE<br>JOGO',won?`Tabuleiro completo! ${points} pontos. Parabéns!`:`Você fez ${points} pontos. Recorde: ${best}. Tente novamente!`,won?'★':'✕','↻ JOGAR DE NOVO');}
+      function pause(){if(state==='running'){state='paused';clearTimeout(timer);show('PAUSADO','Toque em continuar para voltar ao jogo.','Ⅱ','▶ CONTINUAR');updateHud();}else if(state==='paused'){state='running';overlay.hidden=true;updateHud();schedule();}}
+      function turn(name){if(!dirs[name])return;if(state==='ready'){start()}if(state!=='running')return;const nd=dirs[name],last=pending.length?pending[pending.length-1]:dir;if((nd.x===-last.x&&nd.y===-last.y)||(nd.x===last.x&&nd.y===last.y))return;if(pending.length<2){pending.push(nd)}}
+      function rect(x,y,color,inset=0){ctx.fillStyle=color;ctx.fillRect(x*CELL+inset,y*CELL+inset,CELL-2*inset,CELL-2*inset)}
+      function draw(){ctx.fillStyle='#acbd88';ctx.fillRect(0,0,400,400);
+        if(food){rect(food.x,food.y,'#2a4530',4);rect(food.x,food.y,'#46673d',7);}
+        snake.forEach((s,i)=>{rect(s.x,s.y,i===0?'#243d2a':'#304b32',1);rect(s.x,s.y,i===0?'#4b6743':'#658156',4);if(i===0){let e1,e2;if(dir.x!==0){e1={x:dir.x===1?12:5,y:5};e2={x:dir.x===1?12:5,y:12}}else{e1={x:5,y:dir.y===1?12:5};e2={x:12,y:dir.y===1?12:5}}ctx.fillStyle='#213b29';ctx.fillRect(s.x*CELL+e1.x,s.y*CELL+e1.y,3,3);ctx.fillRect(s.x*CELL+e2.x,s.y*CELL+e2.y,3,3)}})
+      }
+      document.querySelectorAll('[data-dir]').forEach(b=>b.addEventListener('click',()=>turn(b.dataset.dir)));
+      document.querySelectorAll('[data-speed]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.speed===difficulty));b.addEventListener('click',()=>{difficulty=b.dataset.speed;store('snake3310_difficulty',difficulty);document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.speed===difficulty)));if(state==='running')schedule()})});
+      $('sound').addEventListener('click',e=>{soundOn=!soundOn;store('snake3310_sound',soundOn);setSound();if(soundOn){unlockAudio(e);tone(540)}});
+      function setSound(){$('sound-icon').textContent=soundOn?'♫':'♪';$('sound-label').textContent=soundOn?'SOM ON':'SOM OFF';$('sound-indicator').textContent=soundOn?'♪ ON':'♪ OFF';$('sound').setAttribute('aria-pressed',String(soundOn))}
+      $('pause').addEventListener('click',pause);
+      $('restart').addEventListener('click',start);
+      play.addEventListener('click',()=>{if(state==='paused')pause();else start()});
+      document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey||e.target.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;const k=e.key.toLowerCase(),map={arrowup:'up',w:'up',arrowdown:'down',s:'down',arrowleft:'left',a:'left',arrowright:'right',d:'right'};if(e.target.closest('button')&&(k===' '||k==='enter'))return;if(map[k]){e.preventDefault();if(!e.repeat)turn(map[k]);}else if(k===' '||k==='p'){e.preventDefault();if(e.repeat)return;if(state==='ready'||state==='lost'||state==='won')start();else pause()}else if(k==='enter'&&(state==='ready'||state==='lost'||state==='won')){e.preventDefault();if(!e.repeat)start()}});
+      let swipe=null;const field=$('field');
+      field.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button!==0||e.target.closest('button'))return;swipe={id:e.pointerId,x:e.clientX,y:e.clientY};try{field.setPointerCapture(e.pointerId)}catch(error){}});
+      field.addEventListener('pointerup',e=>{if(!swipe||swipe.id!==e.pointerId)return;const dx=e.clientX-swipe.x,dy=e.clientY-swipe.y;swipe=null;if(Math.max(Math.abs(dx),Math.abs(dy))<18)return;turn(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up')});
+      field.addEventListener('pointercancel',()=>{swipe=null});
+      field.addEventListener('lostpointercapture',()=>{swipe=null});
+
+
+      document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='running')pause()});
+      window.addEventListener('pagehide',()=>{if(state==='running')pause()});
+      reset();draw();updateHud();setSound();
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+      const isStandalone = window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+      if (isIOS && !isStandalone) $('iphone-install').style.display='block';
+
+      const snapshot=()=>({state,points,best,difficulty,soundOn,snake:snake.map(p=>({...p})),food:food&&{...food}});
+      const modelContext=document.modelContext;
+      if(modelContext&&typeof modelContext.registerTool==='function'){
+        const lifecycle=new AbortController();
+        const register=tool=>{try{Promise.resolve(modelContext.registerTool(tool,{signal:lifecycle.signal})).catch(()=>{})}catch(error){}};
+        register({name:'inspect_snake_game',description:'Read the current board, score and game status.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute:()=>snapshot()});
+        register({name:'control_snake_game',description:'Start, restart, pause, resume or turn the snake game using the same actions as the visible controls.',inputSchema:{type:'object',properties:{action:{type:'string',enum:['start','restart','pause','resume','up','down','left','right']}},required:['action'],additionalProperties:false},annotations:{readOnlyHint:false},execute:input=>{if(!input||typeof input!=='object'||Object.keys(input).length!==1||!['start','restart','pause','resume','up','down','left','right'].includes(input.action))throw new Error('Ação inválida');const a=input.action;if(a==='restart'||(a==='start'&&['ready','lost','won'].includes(state)))start();else if((a==='pause'&&state==='running')||(a==='resume'&&state==='paused'))pause();else if(dirs[a])turn(a);return snapshot()}});
+        window.addEventListener('pagehide',e=>{if(!e.persisted)lifecycle.abort()},{once:true});
+      }
+    })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost','127.0.0.1','[::1]'].includes(location.hostname))) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
+

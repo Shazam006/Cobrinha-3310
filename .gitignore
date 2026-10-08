@@ -1,0 +1,12 @@
+node_modules/
+native-app/www/
+native-app/build/
+native-app/ios/App/App/public/
+native-app/ios/App/App/capacitor.config.json
+native-app/ios/App/App/config.xml
+native-app/ios/capacitor-cordova-ios-plugins/
+unit-results.json
+.DS_Store
+.env*
+*.ipa
+*.zip

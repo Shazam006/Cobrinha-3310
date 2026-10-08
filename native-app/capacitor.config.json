@@ -1,0 +1,6 @@
+{
+  "appId": "br.com.pedro.cobrinha3310",
+  "appName": "Cobrinha 3310",
+  "webDir": "www",
+  "ios": {"contentInset": "never", "backgroundColor": "#18251f", "scrollEnabled": true}
+}
