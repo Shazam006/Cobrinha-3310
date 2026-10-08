@@ -23,3 +23,13 @@ Com Node.js 22.13 ou superior, entre em `native-app` e execute `npm ci`, `npm ru
 O scaffold iOS segue a estrutura já compilada do Open Finance, adaptada para um app separado. Não contém interface, dados financeiros nem permissões daquele app. Esta versão não precisa de câmera, localização, contatos, arquivos compartilhados ou backend.
 
 O resultado da instalação e o teste em iPhone físico devem ser registrados após executados; a preparação do projeto ou o sucesso da compilação não prova instalação no aparelho.
+
+## Atualização 1.0.1
+
+A cobra agora se anima entre os passos da grade com um relógio sincronizado aos quadros da tela. A lógica mantém as velocidades e as regras originais. Quadros atrasados não causam uma sequência de movimentos invisíveis. Os desenhos dos segmentos são reutilizados e o placar só é atualizado quando necessário.
+
+Os botões direcionais respondem ao pressionar; o swipe responde ao atingir o limiar, sem esperar soltar o dedo. A escolha da comida usa uma varredura linear e os efeitos de áudio liberam seus nós ao terminar. A preferência de movimento reduzido continua respeitada.
+
+Validação: 14 grupos de testes, incluindo 60/120 Hz, atrasos longos, 6000 movimentos, toque imediato, movimento reduzido e os testes anteriores de colisão e fila. A interface nativa passou por testes em Chromium móvel com CPU reduzida a um sexto da velocidade, pausa, swipe e persistência do recorde. O desempenho desta atualização no iPhone físico precisa ser confirmado após a instalação.
+
+Instale sobre a versão anterior com a mesma conta no Sideloadly. O identificador do aplicativo permanece br.com.pedro.cobrinha3310, preservando os dados locais na atualização normal.

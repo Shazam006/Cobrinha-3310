@@ -1,5 +1,5 @@
 /* Increment this cache version whenever the app shell or icons change. */
-const CACHE_NAME = 'cobrinha-3310-static-v2';
+const CACHE_NAME = 'cobrinha-3310-static-v3';
 const ASSETS = [
   './',
   './index.html',
